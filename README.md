@@ -14,7 +14,7 @@ Open GrayLog interface System / Inputs -> Content Packs -> Import Content Pack.
 
 Activate the content pack.
 
-## Useage
+## Usage
 
 On linux with rsyslogd v7.6 and newer 
 
