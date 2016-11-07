@@ -17,26 +17,28 @@ Activate the content pack.
 ## Useage
 
 On linux with syslogd v7.6 and newer
+~~~~
+nano /etc/rsyslog.d/60-squid.conf
+~~~~
+~~~~
+# Load Modules
+module(load="imfile")
+module(load="omfwd")
 
-  nano /etc/rsyslog.d/60-squid.conf
+# rsyslog Input Modules
+input(type="imfile"
+         File="/var/log/squid/access.log"
+         Tag="squid-access"
+         Severity="info"
+         Facility="local7"
+         ruleset="SquidForward")
 
-  # Load Modules
-  module(load="imfile")
-  module(load="omfwd")
-
-  # rsyslog Input Modules
-  input(type="imfile"
-           File="/var/log/squid/access.log"
-           Tag="squid-access"
-           Severity="info"
-           Facility="local7"
-           ruleset="SquidForward")
-
-  # rsyslog RuleSets
-  ruleset(name="SquidForward") {
-          action(type="omfwd"
-          Target="10.x.x.x"
-          Port="19302"
-          Protocol="tcp"
-          template="RSYSLOG_SyslogProtocol23Format")
-  }
+# rsyslog RuleSets
+ruleset(name="SquidForward") {
+        action(type="omfwd"
+        Target="10.x.x.x"
+        Port="19302"
+        Protocol="tcp"
+        template="RSYSLOG_SyslogProtocol23Format")
+}
+~~~~
