@@ -3,10 +3,24 @@ A Graylog squid content pack.
 
 This content pack will launch a SYSLOG_TCP input on port 19302 and will parse your squid logs to be ingested and processed into greylog.
 
-example log
+The following fields are extracted from the standard squid log.
 
-
-**Required Graylog version:** 2.0.0 and later
+Duration
+Client_Address
+Method
+Result_Code
+Status_Code
+URI
+URI_Protocol
+URI_User
+URI_Host
+URI_Port
+URI_Path
+URI_Fragment
+User
+Peer_Status
+Peer_Host
+Content-Type
 
 ## Installation
 
