@@ -1,26 +1,31 @@
 # GraySquid
 A Graylog squid content pack.
 
-This content pack will launch a SYSLOG_TCP input on port 19302 and will parse your squid logs to be ingested and processed into greylog.
+This content pack will launch a SYSLOG_TCP input on port 19302 and will parse your squid logs to be ingested and processed into GrayLog.
 
 The following fields are extracted from the standard squid log.
 
-Duration
-Client_Address
-Method
-Result_Code
-Status_Code
-URI
-URI_Protocol
-URI_User
-URI_Host
-URI_Port
-URI_Path
-URI_Fragment
-User
-Peer_Status
-Peer_Host
-Content-Type
+*Duration
+*Client_Address
+*Method
+*Result_Code
+*Status_Code
+*URI
+*URI_Protocol
+*URI_User
+*URI_Host
+*URI_Port
+*URI_Path
+*URI_Fragment
+*User
+*Peer_Status
+*Peer_Host
+*Content-Type
+
+Example Squid log
+~~~~
+1478495112.396    357 10.129.64.100 TCP_MISS/200 555 HEAD http://ds.download.windowsupdate.com/v11/2/windowsupdate/redir/v6-wuredir.cab? - FIRSTUP_PARENT/210.15.254.246 application/octet-stream
+~~~~
 
 ## Installation
 
