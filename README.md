@@ -5,22 +5,22 @@ This content pack will launch a SYSLOG_TCP input on port 19302 and will parse yo
 
 The following fields are extracted from the standard squid log.
 
-*Duration
-*Client_Address
-*Method
-*Result_Code
-*Status_Code
-*URI
-*URI_Protocol
-*URI_User
-*URI_Host
-*URI_Port
-*URI_Path
-*URI_Fragment
-*User
-*Peer_Status
-*Peer_Host
-*Content-Type
+* Duration
+* Client_Address
+* Method
+* Result_Code
+* Status_Code
+* URI
+* URI_Protocol
+* URI_User
+* URI_Host
+* URI_Port
+* URI_Path
+* URI_Fragment
+* User
+* Peer_Status
+* Peer_Host
+* Content-Type
 
 Example Squid log
 ~~~~
