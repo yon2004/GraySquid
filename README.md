@@ -16,10 +16,17 @@ Activate the content pack.
 
 ## Useage
 
-On linux with syslogd v7.6 and newer
+On linux with rsyslogd v7.6 and newer 
+
+~~~~
+rsyslogd -v
+rsyslogd 8.16.0
+~~~~
+
 ~~~~
 nano /etc/rsyslog.d/60-squid.conf
 ~~~~
+change 10.x.x.x in the below config to your GrayLog server ip.
 ~~~~
 # Load Modules
 module(load="imfile")
@@ -42,3 +49,12 @@ ruleset(name="SquidForward") {
         template="RSYSLOG_SyslogProtocol23Format")
 }
 ~~~~
+Add graylog to have permissions to the proxy logs. (probbly not how to do it)
+~~~~
+usermod -a -G proxy syslog
+~~~~
+Restart rsyslog
+~~~~
+/etc/init.d/rsyslog restart
+~~~~
+
