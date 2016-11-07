@@ -11,12 +11,12 @@ The following fields are extracted from the standard squid log.
 * Result_Code
 * Status_Code
 * URI
-* URI_Protocol
-* URI_User
+* URI_Protocol (optional)
+* URI_User (optional)
 * URI_Host
-* URI_Port
-* URI_Path
-* URI_Fragment
+* URI_Port (optional)
+* URI_Path (optional)
+* URI_Fragment (optional)
 * User
 * Peer_Status
 * Peer_Host
