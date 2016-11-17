@@ -1,6 +1,6 @@
 {
    "name":"Squid Logs",
-   "description":"A pack that can decode squid default log format.",
+   "description":"A pack that can decode squid default log format and make it usefull.",
    "category":"Proxies",
    "inputs":[
       {
