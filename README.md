@@ -24,7 +24,7 @@ The following fields are extracted from the standard squid log.
 
 Example Squid log
 ~~~~
-1478495112.396    357 10.129.64.100 TCP_MISS/200 555 HEAD http://ds.download.windowsupdate.com/v11/2/windowsupdate/redir/v6-wuredir.cab? - FIRSTUP_PARENT/210.15.254.246 application/octet-stream
+1478495112.396    357 10.1.2.3 TCP_MISS/200 555 HEAD http://ds.download.windowsupdate.com/v11/2/windowsupdate/redir/v6-wuredir.cab? - FIRSTUP_PARENT/241.242.243.245 application/octet-stream
 ~~~~
 
 ## Installation
