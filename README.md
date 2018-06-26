@@ -49,7 +49,6 @@ change 10.x.x.x in the below config to your GrayLog server ip.
 ~~~~
 # Load Modules
 module(load="imfile")
-module(load="omfwd")
 
 # rsyslog Input Modules
 input(type="imfile"
