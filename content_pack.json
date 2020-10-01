@@ -1,475 +1,4318 @@
 {
-   "name":"Squid Logs",
-   "description":"A pack that can decode squid default log format and make it usefull.",
-   "category":"Proxies",
-   "inputs":[
-      {
-         "title":"Squid-Access",
-         "configuration":{
-            "recv_buffer_size":1048576,
-            "tcp_keepalive":false,
-            "use_null_delimiter":false,
-            "tls_client_auth_cert_file":"",
-            "force_rdns":false,
-            "bind_address":"0.0.0.0",
-            "tls_cert_file":"",
-            "store_full_message":false,
-            "expand_structured_data":false,
-            "port":19302,
-            "tls_key_file":"",
-            "tls_enable":false,
-            "tls_key_password":"",
-            "max_message_size":2097152,
-            "tls_client_auth":"disabled",
-            "override_source":null,
-            "allow_override_date":true
-         },
-         "static_fields":{
-
-         },
-         "type":"org.graylog2.inputs.syslog.tcp.SyslogTCPInput",
-         "global":false,
-         "extractors":[
-            {
-               "title":"Squid Extractor",
-               "type":"GROK",
-               "cursor_strategy":"COPY",
-               "target_field":"",
-               "source_field":"message",
-               "configuration":{
-                  "grok_pattern":"^%{BASE10NUM:UNWANTED}%{SPACE:UNWANTED}%{INT:Duration;int} %{IPV4:Client_Address} %{DATA:Result_Code;string}\\/%{BASE10NUM:Status_Code;int} %{INT:Bytes;int} %{WORD:Method;string} %{SQUIDURI:URI;string} %{DATA:User;string} %{DATA:Peer_Status;string}\\/%{DATA:Peer_Host;string} %{DATA:Content-Type;string}$",
-                  "named_captures_only":false
-               },
-               "converters":[
-
-               ],
-               "condition_type":"NONE",
-               "condition_value":"",
-               "order":0
+  "v": 1,
+  "id": "cfb9a6d8-ccd2-4870-ae94-732013aa492b",
+  "rev": 1,
+  "name": "Squid Logs",
+  "summary": "A pack that can decode squid default log format and make it useful.",
+  "description": "A pack that can decode squid default log format and make it useful.",
+  "vendor": "yon2004",
+  "url": "https://github.com/yon2004/GraySquid",
+  "parameters": [],
+  "entities": [
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline_rule",
+        "version": "1"
+      },
+      "id": "ac0d2589-634b-45c8-9ca8-3b76d74797d6",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Bytes to Megabytes"
+        },
+        "description": {
+          "@type": "string",
+          "@value": ""
+        },
+        "source": {
+          "@type": "string",
+          "@value": "rule \"Bytes to Megabytes\"\nwhen\n  has_field(\"Bytes\")\nthen\n  let mbyte = to_double($message.Bytes);\n  set_field(\"Squid_MBytes\", mbyte / 1048576.0);\n  set_field(\"Squid_GBytes\", mbyte / 1073741824.0);\nend"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=3.3.6+92fb41e"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "pipeline",
+        "version": "1"
+      },
+      "id": "23fb1ce7-1e65-430e-8e57-82439af3f4af",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Squid Pipeline"
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Squid Pipeline"
+        },
+        "source": {
+          "@type": "string",
+          "@value": "pipeline \"Squid Pipeline\"\nstage 0 match either\nrule \"Bytes to Megabytes\"\nend"
+        },
+        "connected_streams": [
+          {
+            "@type": "string",
+            "@value": "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+          }
+        ]
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=3.3.6+92fb41e"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "stream",
+        "version": "1"
+      },
+      "id": "0ae576d9-66cf-4374-9646-d6cdf9616eea",
+      "data": {
+        "alarm_callbacks": [],
+        "outputs": [],
+        "remove_matches": {
+          "@type": "boolean",
+          "@value": false
+        },
+        "title": {
+          "@type": "string",
+          "@value": "Squid Stream"
+        },
+        "stream_rules": [
+          {
+            "type": {
+              "@type": "string",
+              "@value": "EXACT"
+            },
+            "field": {
+              "@type": "string",
+              "@value": "application_name"
+            },
+            "value": {
+              "@type": "string",
+              "@value": "squid-access"
+            },
+            "inverted": {
+              "@type": "boolean",
+              "@value": false
+            },
+            "description": {
+              "@type": "string",
+              "@value": ""
             }
-         ]
-      }
-   ],
-   "streams":[
-
-   ],
-   "outputs":[
-
-   ],
-   "dashboards":[
-      {
-         "title":"Squid TCP_ALLOWED",
-         "description":" Squid stats for TCP_ALLOWED",
-         "dashboard_widgets":[
-            {
-               "description":"15min TCP_ALLOWED",
-               "type":"SEARCH_RESULT_COUNT",
-               "cache_time":10,
-               "configuration":{
-                  "timerange":{
-                     "type":"relative",
-                     "range":900
-                  },
-                  "lower_is_better":false,
-                  "trend":true,
-                  "query":"application_name:squid\\-access AND NOT Result_Code:TCP_DENIED"
-               },
-               "col":0,
-               "row":0,
-               "height":0,
-               "width":0
+          }
+        ],
+        "alert_conditions": [],
+        "matching_type": {
+          "@type": "string",
+          "@value": "AND"
+        },
+        "disabled": {
+          "@type": "boolean",
+          "@value": false
+        },
+        "description": {
+          "@type": "string",
+          "@value": "Squid Stream"
+        },
+        "default_stream": {
+          "@type": "boolean",
+          "@value": false
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=3.3.6+92fb41e"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "input",
+        "version": "1"
+      },
+      "id": "72b29105-9213-4023-b6ef-3cef4168601a",
+      "data": {
+        "title": {
+          "@type": "string",
+          "@value": "Squid-Access"
+        },
+        "configuration": {
+          "tls_key_file": {
+            "@type": "string",
+            "@value": ""
+          },
+          "port": {
+            "@type": "integer",
+            "@value": 19302
+          },
+          "tls_enable": {
+            "@type": "boolean",
+            "@value": false
+          },
+          "use_null_delimiter": {
+            "@type": "boolean",
+            "@value": false
+          },
+          "recv_buffer_size": {
+            "@type": "integer",
+            "@value": 1048576
+          },
+          "tcp_keepalive": {
+            "@type": "boolean",
+            "@value": false
+          },
+          "force_rdns": {
+            "@type": "boolean",
+            "@value": false
+          },
+          "allow_override_date": {
+            "@type": "boolean",
+            "@value": true
+          },
+          "tls_client_auth_cert_file": {
+            "@type": "string",
+            "@value": ""
+          },
+          "bind_address": {
+            "@type": "string",
+            "@value": "0.0.0.0"
+          },
+          "tls_cert_file": {
+            "@type": "string",
+            "@value": ""
+          },
+          "expand_structured_data": {
+            "@type": "boolean",
+            "@value": false
+          },
+          "max_message_size": {
+            "@type": "integer",
+            "@value": 2097152
+          },
+          "store_full_message": {
+            "@type": "boolean",
+            "@value": false
+          },
+          "tls_client_auth": {
+            "@type": "string",
+            "@value": "disabled"
+          },
+          "tls_key_password": {
+            "@type": "string",
+            "@value": ""
+          }
+        },
+        "static_fields": {},
+        "type": {
+          "@type": "string",
+          "@value": "org.graylog2.inputs.syslog.tcp.SyslogTCPInput"
+        },
+        "global": {
+          "@type": "boolean",
+          "@value": false
+        },
+        "extractors": [
+          {
+            "target_field": {
+              "@type": "string",
+              "@value": ""
             },
-            {
-               "description":"15min TCP_ALLOWED bytes",
-               "type":"STATS_COUNT",
-               "cache_time":10,
-               "configuration":{
-                  "timerange":{
-                     "type":"relative",
-                     "range":900
-                  },
-                  "field":"Bytes",
-                  "trend":true,
-                  "query":"application_name:squid\\-access AND NOT Result_Code:TCP_DENIED",
-                  "stats_function":"sum",
-                  "lower_is_better":false
-               },
-               "col":0,
-               "row":0,
-               "height":0,
-               "width":0
+            "condition_value": {
+              "@type": "string",
+              "@value": ""
             },
-            {
-               "description":"15min TCP_ALLOWED Clients",
-               "type":"QUICKVALUES",
-               "cache_time":10,
-               "configuration":{
-                  "timerange":{
-                     "type":"relative",
-                     "range":900
-                  },
-                  "field":"Client_Address",
-                  "show_pie_chart":false,
-                  "query":"application_name:squid\\-access AND NOT Result_Code:TCP_DENIED",
-                  "show_data_table":true
-               },
-               "col":0,
-               "row":0,
-               "height":0,
-               "width":0
+            "order": {
+              "@type": "integer",
+              "@value": 0
             },
-            {
-               "description":"15min TCP_ALLOWED Users",
-               "type":"QUICKVALUES",
-               "cache_time":10,
-               "configuration":{
-                  "timerange":{
-                     "type":"relative",
-                     "range":900
-                  },
-                  "field":"User",
-                  "show_pie_chart":false,
-                  "query":"application_name:squid\\-access AND NOT Result_Code:TCP_DENIED",
-                  "show_data_table":true
-               },
-               "col":0,
-               "row":0,
-               "height":0,
-               "width":0
+            "converters": [],
+            "configuration": {
+              "grok_pattern": {
+                "@type": "string",
+                "@value": "^%{BASE10NUM:UNWANTED}%{SPACE:UNWANTED}%{INT:Duration;int} %{IPV4:Client_Address} %{DATA:Result_Code;string}\\/%{BASE10NUM:Status_Code;int} %{INT:Bytes;int} %{WORD:Method;string} %{SQUIDURI:URI;string} %{DATA:User;string} %{DATA:Peer_Status;string}\\/%{DATA:Peer_Host;string} %{DATA:Content-Type;string}$"
+              },
+              "named_captures_only": {
+                "@type": "boolean",
+                "@value": false
+              }
             },
-            {
-               "description":"15min TCP_ALLOWED Domains",
-               "type":"QUICKVALUES",
-               "cache_time":10,
-               "configuration":{
-                  "timerange":{
-                     "type":"relative",
-                     "range":900
-                  },
-                  "field":"URI_Host",
-                  "show_pie_chart":false,
-                  "query":"application_name:squid\\-access AND NOT Result_Code:TCP_DENIED",
-                  "show_data_table":true
-               },
-               "col":0,
-               "row":0,
-               "height":0,
-               "width":0
+            "source_field": {
+              "@type": "string",
+              "@value": "message"
+            },
+            "title": {
+              "@type": "string",
+              "@value": "Squid Extractor"
+            },
+            "type": {
+              "@type": "string",
+              "@value": "GROK"
+            },
+            "cursor_strategy": {
+              "@type": "string",
+              "@value": "COPY"
+            },
+            "condition_type": {
+              "@type": "string",
+              "@value": "NONE"
             }
-         ]
-      },
-      {
-         "title":"SquidStats",
-         "description":"Statistics for Squid",
-         "dashboard_widgets":[
-            {
-               "description":"15min Requests by Users",
-               "type":"QUICKVALUES",
-               "cache_time":10,
-               "configuration":{
-                  "timerange":{
-                     "type":"relative",
-                     "range":900
-                  },
-                  "field":"User",
-                  "show_pie_chart":false,
-                  "query":"application_name:squid\\-access",
-                  "show_data_table":true
-               },
-               "col":2,
-               "row":1,
-               "height":2,
-               "width":1
+          },
+          {
+            "target_field": {
+              "@type": "string",
+              "@value": "SQUID_hostLevel1"
             },
-            {
-               "description":"15min Status_Codes",
-               "type":"QUICKVALUES",
-               "cache_time":10,
-               "configuration":{
-                  "timerange":{
-                     "type":"relative",
-                     "range":900
-                  },
-                  "field":"Status_Code",
-                  "show_pie_chart":false,
-                  "query":"application_name:squid\\-access",
-                  "show_data_table":true
-               },
-               "col":3,
-               "row":3,
-               "height":2,
-               "width":1
+            "condition_value": {
+              "@type": "string",
+              "@value": ""
             },
-            {
-               "description":"15min Result_Code",
-               "type":"QUICKVALUES",
-               "cache_time":10,
-               "configuration":{
-                  "timerange":{
-                     "type":"relative",
-                     "range":900
-                  },
-                  "field":"Result_Code",
-                  "show_pie_chart":false,
-                  "query":"application_name:squid\\-access",
-                  "show_data_table":true
-               },
-               "col":3,
-               "row":1,
-               "height":2,
-               "width":1
+            "order": {
+              "@type": "integer",
+              "@value": 2
             },
-            {
-               "description":"15min Client_Address",
-               "type":"QUICKVALUES",
-               "cache_time":10,
-               "configuration":{
-                  "timerange":{
-                     "type":"relative",
-                     "range":900
-                  },
-                  "field":"Client_Address",
-                  "show_pie_chart":false,
-                  "query":"application_name:squid\\-access",
-                  "show_data_table":true
-               },
-               "col":2,
-               "row":3,
-               "height":2,
-               "width":1
+            "converters": [],
+            "configuration": {
+              "regex_value": {
+                "@type": "string",
+                "@value": "([\\w\\-]+\\.[\\w\\-]+)$"
+              }
             },
-            {
-               "description":"15min Squid Requests",
-               "type":"SEARCH_RESULT_COUNT",
-               "cache_time":10,
-               "configuration":{
-                  "timerange":{
-                     "type":"relative",
-                     "range":900
-                  },
-                  "lower_is_better":false,
-                  "trend":true,
-                  "query":"application_name:squid\\-access"
-               },
-               "col":1,
-               "row":4,
-               "height":1,
-               "width":1
+            "source_field": {
+              "@type": "string",
+              "@value": "URI_Host"
             },
-            {
-               "description":"15min Unique Client IP",
-               "type":"STATS_COUNT",
-               "cache_time":10,
-               "configuration":{
-                  "timerange":{
-                     "type":"relative",
-                     "range":900
-                  },
-                  "field":"Client_Address",
-                  "trend":true,
-                  "query":"application_name:squid\\-access",
-                  "stats_function":"cardinality",
-                  "lower_is_better":false
-               },
-               "col":1,
-               "row":3,
-               "height":1,
-               "width":1
+            "title": {
+              "@type": "string",
+              "@value": "SQUID_hostLevel1"
             },
-            {
-               "description":"15min Cache Bytes",
-               "type":"STATS_COUNT",
-               "cache_time":10,
-               "configuration":{
-                  "timerange":{
-                     "type":"relative",
-                     "range":900
-                  },
-                  "field":"Bytes",
-                  "trend":true,
-                  "query":"application_name:squid\\-access AND (Result_Code:TCP_MEM_HIT OR Result_Code:TCP_HIT)",
-                  "stats_function":"sum",
-                  "lower_is_better":false
-               },
-               "col":1,
-               "row":2,
-               "height":1,
-               "width":1
+            "type": {
+              "@type": "string",
+              "@value": "REGEX"
             },
-            {
-               "description":"15min Total Bytes",
-               "type":"STATS_COUNT",
-               "cache_time":10,
-               "configuration":{
-                  "timerange":{
-                     "type":"relative",
-                     "range":900
-                  },
-                  "field":"Bytes",
-                  "trend":true,
-                  "query":"application_name:squid\\-access",
-                  "stats_function":"sum",
-                  "lower_is_better":false
-               },
-               "col":1,
-               "row":1,
-               "height":1,
-               "width":1
+            "cursor_strategy": {
+              "@type": "string",
+              "@value": "COPY"
             },
-            {
-               "description":"15min Top Domains",
-               "type":"QUICKVALUES",
-               "cache_time":10,
-               "configuration":{
-                  "timerange":{
-                     "type":"relative",
-                     "range":900
-                  },
-                  "field":"URI_Host",
-                  "show_pie_chart":false,
-                  "query":"application_name:squid\\-access",
-                  "show_data_table":true
-               },
-               "col":4,
-               "row":3,
-               "height":2,
-               "width":1
-            },
-            {
-               "description":"15min Cache Domains",
-               "type":"QUICKVALUES",
-               "cache_time":10,
-               "configuration":{
-                  "timerange":{
-                     "type":"relative",
-                     "range":900
-                  },
-                  "field":"URI_Host",
-                  "show_pie_chart":false,
-                  "query":"application_name:squid\\-access AND (Result_Code:TCP_MEM_HIT OR Result_Code:TCP_HIT)",
-                  "show_data_table":true
-               },
-               "col":4,
-               "row":1,
-               "height":2,
-               "width":1
+            "condition_type": {
+              "@type": "string",
+              "@value": "NONE"
             }
-         ]
-      },
-      {
-         "title":"Squid TCP_DENIED Stats",
-         "description":"Squid stats for TCP_DENIED ",
-         "dashboard_widgets":[
-            {
-               "description":"15min TCP_DENIED",
-               "type":"SEARCH_RESULT_COUNT",
-               "cache_time":10,
-               "configuration":{
-                  "timerange":{
-                     "type":"relative",
-                     "range":900
-                  },
-                  "lower_is_better":true,
-                  "trend":true,
-                  "query":"application_name:squid\\-access AND Result_Code:TCP_DENIED"
-               },
-               "col":1,
-               "row":1,
-               "height":1,
-               "width":1
+          },
+          {
+            "target_field": {
+              "@type": "string",
+              "@value": "SQUID_hostLevel0"
             },
-            {
-               "description":"15min TCP_DENIED Hosts",
-               "type":"QUICKVALUES",
-               "cache_time":10,
-               "configuration":{
-                  "timerange":{
-                     "type":"relative",
-                     "range":900
-                  },
-                  "field":"Client_Address",
-                  "show_pie_chart":false,
-                  "query":"application_name:squid\\-access AND Result_Code:TCP_DENIED",
-                  "show_data_table":true
-               },
-               "col":3,
-               "row":1,
-               "height":2,
-               "width":1
+            "condition_value": {
+              "@type": "string",
+              "@value": ""
             },
-            {
-               "description":"15min TCP_DENIED Domains",
-               "type":"QUICKVALUES",
-               "cache_time":10,
-               "configuration":{
-                  "timerange":{
-                     "type":"relative",
-                     "range":900
-                  },
-                  "field":"URI_Host",
-                  "show_pie_chart":false,
-                  "query":"application_name:squid\\-access AND Result_Code:TCP_DENIED",
-                  "show_data_table":true
-               },
-               "col":2,
-               "row":1,
-               "height":2,
-               "width":1
+            "order": {
+              "@type": "integer",
+              "@value": 1
             },
-            {
-               "description":"15min TCP_DENIED Users",
-               "type":"QUICKVALUES",
-               "cache_time":10,
-               "configuration":{
-                  "timerange":{
-                     "type":"relative",
-                     "range":900
-                  },
-                  "field":"User",
-                  "show_pie_chart":false,
-                  "query":"application_name:squid\\-access AND Result_Code:TCP_DENIED",
-                  "show_data_table":true
-               },
-               "col":2,
-               "row":3,
-               "height":2,
-               "width":1
+            "converters": [],
+            "configuration": {
+              "regex_value": {
+                "@type": "string",
+                "@value": "(\\.[\\w\\-]+)$"
+              }
+            },
+            "source_field": {
+              "@type": "string",
+              "@value": "URI_Host"
+            },
+            "title": {
+              "@type": "string",
+              "@value": "SQUID_hostLevel0"
+            },
+            "type": {
+              "@type": "string",
+              "@value": "REGEX"
+            },
+            "cursor_strategy": {
+              "@type": "string",
+              "@value": "COPY"
+            },
+            "condition_type": {
+              "@type": "string",
+              "@value": "NONE"
             }
-         ]
-      }
-   ],
-   "grok_patterns":[
-      {
-         "name":"SQUIDURI",
-         "pattern":"(?:%{SQUIDURIPROTO:URI_Protocol;string}:\\/\\/|)(?:%{SQUIDURIUSER:URI_User;string}@|)%{SQUIDURIHOST:URI_Host;string}(?:\\:%{SQUIDURIPORT:URI_Port;int}|)(?:\\/%{SQUIDURIPATH:URI_Path;string}|)(?:#%{SQUIDURIFRAG:URI_Frag;string}|)"
+          },
+          {
+            "target_field": {
+              "@type": "string",
+              "@value": "SQUID_hostLevel2"
+            },
+            "condition_value": {
+              "@type": "string",
+              "@value": ""
+            },
+            "order": {
+              "@type": "integer",
+              "@value": 3
+            },
+            "converters": [],
+            "configuration": {
+              "regex_value": {
+                "@type": "string",
+                "@value": "([\\w\\-]+\\.[\\w\\-]+\\.[\\w\\-]+)$"
+              }
+            },
+            "source_field": {
+              "@type": "string",
+              "@value": "URI_Host"
+            },
+            "title": {
+              "@type": "string",
+              "@value": "SQUID_hostLevel2"
+            },
+            "type": {
+              "@type": "string",
+              "@value": "REGEX"
+            },
+            "cursor_strategy": {
+              "@type": "string",
+              "@value": "COPY"
+            },
+            "condition_type": {
+              "@type": "string",
+              "@value": "NONE"
+            }
+          }
+        ]
       },
-      {
-         "name":"SQUIDURIUSER",
-         "pattern":"([a-z0-9-._~!$&'()*+,;=:]+)"
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=3.3.6+92fb41e"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
       },
-      {
-         "name":"SQUIDURIFRAG",
-         "pattern":"([a-z0-9-._~!$&'()*+,;=:]+)"
+      "id": "4d3f7d62-b843-43f7-95d4-27c599aa12fe",
+      "data": {
+        "name": "SQUIDURI",
+        "pattern": "(?:%{SQUIDURIPROTO:URI_Protocol;string}:\\/\\/|)(?:%{SQUIDURIUSER:URI_User;string}@|)%{SQUIDURIHOST:URI_Host;string}(?:\\:%{SQUIDURIPORT:URI_Port;int}|)(?:\\/%{SQUIDURIPATH:URI_Path;string}|)(?:#%{SQUIDURIFRAG:URI_Frag;string}|)(/|)"
       },
-      {
-         "name":"SQUIDURIPATH",
-         "pattern":"([a-zA-Z0-9-._~!$&'()*+,;=:\\/%?]+)"
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=3.3.6+92fb41e"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
       },
-      {
-         "name":"SQUIDCONTENTTYPE",
-         "pattern":"([-\\w]{1,127}\\/[-\\w]{1,127})|(-)"
+      "id": "214ec780-cf69-41d1-b297-689e534d29ad",
+      "data": {
+        "name": "SQUIDURIPATH",
+        "pattern": "([a-zA-Z0-9-._~!$&'()*+,;=:\\/%?]+)"
       },
-      {
-         "name":"SQUIDURIHOST",
-         "pattern":"([a-z0-9-._~!$&'()*+,;=]+)"
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=3.3.6+92fb41e"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
       },
-      {
-         "name":"SQUIDURIPORT",
-         "pattern":"([\\d]+)"
+      "id": "d8611556-4133-4894-a8fb-c6f038e7fb92",
+      "data": {
+        "name": "SQUIDURIUSER",
+        "pattern": "([a-z0-9-._~!$&'()*+,;=:]+)"
       },
-      {
-         "name":"SQUIDURIPROTO",
-         "pattern":"([a-z]+)"
-      }
-   ]
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=3.3.6+92fb41e"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "dashboard",
+        "version": "2"
+      },
+      "id": "a380f309-f7f7-4d2a-8985-a488ca086672",
+      "data": {
+        "summary": {
+          "@type": "string",
+          "@value": "This dashboard was migrated automatically."
+        },
+        "search": {
+          "queries": [
+            {
+              "id": "1e6a5ec6-1e7b-44b1-b4e6-6a05404fb0ee",
+              "timerange": {
+                "type": "relative",
+                "range": 300
+              },
+              "query": {
+                "type": "elasticsearch",
+                "query_string": ""
+              },
+              "search_types": [
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "URI_Port:[19302 TO 19309]"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 28800
+                  },
+                  "streams": [
+                    "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                  ],
+                  "series": [
+                    {
+                      "type": "sum",
+                      "id": "sum(Squid_MBytes)",
+                      "field": "Squid_MBytes"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [
+                    {
+                      "type": "time",
+                      "field": "timestamp",
+                      "interval": {
+                        "type": "auto",
+                        "scaling": 1
+                      }
+                    }
+                  ],
+                  "type": "pivot",
+                  "id": "bd7fb3dd-939f-426f-ad97-d674ca455330",
+                  "column_groups": [
+                    {
+                      "type": "values",
+                      "field": "URI_Host",
+                      "limit": 15
+                    }
+                  ],
+                  "sort": [
+                    {
+                      "type": "pivot",
+                      "field": "timestamp",
+                      "direction": "Ascending"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "dc01c655-a84b-4939-b981-98b1e05a773a",
+              "timerange": {
+                "type": "relative",
+                "range": 300
+              },
+              "query": {
+                "type": "elasticsearch",
+                "query_string": ""
+              },
+              "search_types": [
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-access"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [
+                    "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                  ],
+                  "series": [
+                    {
+                      "type": "sum",
+                      "id": "sum(Squid_GBytes)",
+                      "field": "Squid_GBytes"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [
+                    {
+                      "type": "values",
+                      "field": "Client_Address",
+                      "limit": 50
+                    }
+                  ],
+                  "type": "pivot",
+                  "id": "ae27cf5b-11dc-49d8-aa8b-642bd6588352",
+                  "column_groups": [],
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "sum(Squid_GBytes)",
+                      "direction": "Descending"
+                    }
+                  ]
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-access AND Peer_Host:changemetoip"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [
+                    "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                  ],
+                  "series": [
+                    {
+                      "type": "avg",
+                      "id": "avg(Duration)",
+                      "field": "Duration"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [],
+                  "type": "pivot",
+                  "id": "36ce49c3-da14-4b57-abcd-0c9f0a0c316e",
+                  "column_groups": [],
+                  "sort": []
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-access AND Peer_Host:changemetoip"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [
+                    "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                  ],
+                  "series": [
+                    {
+                      "type": "sum",
+                      "id": "sum(Squid_GBytes)",
+                      "field": "Squid_GBytes"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [],
+                  "type": "pivot",
+                  "id": "facdb2ee-40df-4383-ab6b-b256579d96fc",
+                  "column_groups": [],
+                  "sort": []
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-access AND Peer_Host:10.174.64.122"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [
+                    "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                  ],
+                  "series": [
+                    {
+                      "type": "sum",
+                      "id": "sum(Squid_GBytes)",
+                      "field": "Squid_GBytes"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [],
+                  "type": "pivot",
+                  "id": "7aa0aa8c-360f-4a7b-91a6-9df49dca4933",
+                  "column_groups": [],
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "sum(Squid_GBytes)",
+                      "direction": "Descending"
+                    }
+                  ]
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-access"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [
+                    "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                  ],
+                  "series": [
+                    {
+                      "type": "sum",
+                      "id": "sum(Squid_GBytes)",
+                      "field": "Squid_GBytes"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [
+                    {
+                      "type": "values",
+                      "field": "Client_Address",
+                      "limit": 10
+                    }
+                  ],
+                  "type": "pivot",
+                  "id": "146a3756-4d91-4be5-82d3-5779af0451c2",
+                  "column_groups": [
+                    {
+                      "type": "values",
+                      "field": "URI_Host",
+                      "limit": 5
+                    }
+                  ],
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "sum(Squid_GBytes)",
+                      "direction": "Descending"
+                    }
+                  ]
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-accessAND Peer_Host:10.174.64.122"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [
+                    "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                  ],
+                  "series": [
+                    {
+                      "type": "sum",
+                      "id": "sum(Squid_GBytes)",
+                      "field": "Squid_GBytes"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [
+                    {
+                      "type": "values",
+                      "field": "URI_Host",
+                      "limit": 15
+                    }
+                  ],
+                  "type": "pivot",
+                  "id": "af0984a3-a4e0-48bd-acdc-2a71f21efe0a",
+                  "column_groups": [],
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "sum(Squid_GBytes)",
+                      "direction": "Descending"
+                    }
+                  ]
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-access AND Peer_Host:changemetoip"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [
+                    "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                  ],
+                  "series": [
+                    {
+                      "type": "sum",
+                      "id": "sum(Squid_GBytes)",
+                      "field": "Squid_GBytes"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [
+                    {
+                      "type": "values",
+                      "field": "URI_Host",
+                      "limit": 15
+                    }
+                  ],
+                  "type": "pivot",
+                  "id": "1e15c040-47ff-40ee-abad-97296b8d290c",
+                  "column_groups": [],
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "sum(Squid_GBytes)",
+                      "direction": "Descending"
+                    }
+                  ]
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-accessAND Peer_Host:10.174.64.122"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [
+                    "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                  ],
+                  "series": [
+                    {
+                      "type": "avg",
+                      "id": "avg(Duration)",
+                      "field": "Duration"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [],
+                  "type": "pivot",
+                  "id": "16d529a0-8726-4126-bd09-5baa72ce4ed5",
+                  "column_groups": [],
+                  "sort": []
+                }
+              ]
+            },
+            {
+              "id": "0b0a2c9f-d588-42b9-9a0d-ddbb1e5111b2",
+              "timerange": {
+                "type": "relative",
+                "range": 300
+              },
+              "query": {
+                "type": "elasticsearch",
+                "query_string": ""
+              },
+              "search_types": [
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-access AND Client_Address:172.24.*"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [
+                    "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                  ],
+                  "series": [
+                    {
+                      "type": "sum",
+                      "id": "sum(Squid_GBytes)",
+                      "field": "Squid_GBytes"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [
+                    {
+                      "type": "values",
+                      "field": "Client_Address",
+                      "limit": 30
+                    }
+                  ],
+                  "type": "pivot",
+                  "id": "284403f0-cb75-4a34-afae-ce918e04d9f6",
+                  "column_groups": [],
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "sum(Squid_GBytes)",
+                      "direction": "Descending"
+                    }
+                  ]
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-access AND Client_Address:172.22.*"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [
+                    "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                  ],
+                  "series": [
+                    {
+                      "type": "sum",
+                      "id": "sum(Squid_GBytes)",
+                      "field": "Squid_GBytes"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [
+                    {
+                      "type": "values",
+                      "field": "Client_Address",
+                      "limit": 30
+                    }
+                  ],
+                  "type": "pivot",
+                  "id": "cdfb3d84-87b5-4d47-a455-c13eaa3e1d17",
+                  "column_groups": [],
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "sum(Squid_GBytes)",
+                      "direction": "Descending"
+                    }
+                  ]
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-access AND Client_Address:172.20.*"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [
+                    "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                  ],
+                  "series": [
+                    {
+                      "type": "sum",
+                      "id": "sum(Squid_GBytes)",
+                      "field": "Squid_GBytes"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [
+                    {
+                      "type": "values",
+                      "field": "Client_Address",
+                      "limit": 30
+                    }
+                  ],
+                  "type": "pivot",
+                  "id": "002d19ce-2add-4e30-8b54-0d3497ffe54d",
+                  "column_groups": [],
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "sum(Squid_GBytes)",
+                      "direction": "Descending"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "00000171-ba98-ffdb-a960-00155d2e4305",
+              "timerange": {
+                "type": "relative",
+                "range": 300
+              },
+              "query": {
+                "type": "elasticsearch",
+                "query_string": ""
+              },
+              "search_types": [
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-access"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [],
+                  "series": [
+                    {
+                      "type": "card",
+                      "id": "card(Client_Address)",
+                      "field": "Client_Address"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [],
+                  "type": "pivot",
+                  "id": "4ac38272-df59-45ec-8ace-7097dbbe3cf2",
+                  "column_groups": [],
+                  "sort": []
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-access"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [
+                    "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                  ],
+                  "series": [
+                    {
+                      "type": "sum",
+                      "id": "sum(Squid_GBytes)",
+                      "field": "Squid_GBytes"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [
+                    {
+                      "type": "time",
+                      "field": "timestamp",
+                      "interval": {
+                        "type": "auto",
+                        "scaling": 1
+                      }
+                    }
+                  ],
+                  "type": "pivot",
+                  "id": "09fa4199-72c2-4c05-817b-8ab3e55feea4",
+                  "column_groups": [],
+                  "sort": [
+                    {
+                      "type": "pivot",
+                      "field": "timestamp",
+                      "direction": "Ascending"
+                    }
+                  ]
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-access"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [
+                    "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                  ],
+                  "series": [
+                    {
+                      "type": "count",
+                      "id": "count()",
+                      "field": null
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [
+                    {
+                      "type": "values",
+                      "field": "Result_Code",
+                      "limit": 15
+                    }
+                  ],
+                  "type": "pivot",
+                  "id": "9ef42fdb-2ce4-496f-a080-b56c5925334e",
+                  "column_groups": [],
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "count()",
+                      "direction": "Descending"
+                    }
+                  ]
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-access AND ((URI_Host:*youtube.com) OR (URI_Host:*googlevideo.com))"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [
+                    "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                  ],
+                  "series": [
+                    {
+                      "type": "sum",
+                      "id": "sum(Squid_GBytes)",
+                      "field": "Squid_GBytes"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [],
+                  "type": "pivot",
+                  "id": "97723125-7469-48f9-a740-72a27a176e73",
+                  "column_groups": [],
+                  "sort": []
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-access"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [
+                    "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                  ],
+                  "series": [
+                    {
+                      "type": "sum",
+                      "id": "sum(Squid_GBytes)",
+                      "field": "Squid_GBytes"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [],
+                  "type": "pivot",
+                  "id": "ec5548df-1609-48e0-8a12-3566d1454930",
+                  "column_groups": [],
+                  "sort": []
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-access"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [
+                    "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                  ],
+                  "series": [
+                    {
+                      "type": "count",
+                      "id": "count()",
+                      "field": null
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [],
+                  "type": "pivot",
+                  "id": "492b2088-3a40-4a82-805c-cea0f19782ef",
+                  "column_groups": [],
+                  "sort": []
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-access"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [
+                    "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                  ],
+                  "series": [
+                    {
+                      "type": "count",
+                      "id": "count()",
+                      "field": null
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [
+                    {
+                      "type": "values",
+                      "field": "User",
+                      "limit": 15
+                    }
+                  ],
+                  "type": "pivot",
+                  "id": "9eaab732-38e1-4841-af71-709a12e8228d",
+                  "column_groups": [],
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "count()",
+                      "direction": "Descending"
+                    }
+                  ]
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-access AND ((URI_Host:*apple.com) OR (URI_Host:*icloud*))"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [
+                    "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                  ],
+                  "series": [
+                    {
+                      "type": "sum",
+                      "id": "sum(Squid_GBytes)",
+                      "field": "Squid_GBytes"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [],
+                  "type": "pivot",
+                  "id": "e05e0802-592d-4e73-a300-454dee6e18f5",
+                  "column_groups": [],
+                  "sort": []
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-access"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [
+                    "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                  ],
+                  "series": [
+                    {
+                      "type": "count",
+                      "id": "count()",
+                      "field": null
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [
+                    {
+                      "type": "values",
+                      "field": "URI_Host",
+                      "limit": 15
+                    }
+                  ],
+                  "type": "pivot",
+                  "id": "3e18846b-bdf0-4e10-9cea-c98afe6ae56a",
+                  "column_groups": [],
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "count()",
+                      "direction": "Descending"
+                    }
+                  ]
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-access"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [
+                    "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                  ],
+                  "series": [
+                    {
+                      "type": "count",
+                      "id": "count()",
+                      "field": null
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [
+                    {
+                      "type": "values",
+                      "field": "Client_Address",
+                      "limit": 15
+                    }
+                  ],
+                  "type": "pivot",
+                  "id": "0d90b2ce-cfbb-4ae4-96bb-13cc9a22d526",
+                  "column_groups": [],
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "count()",
+                      "direction": "Descending"
+                    }
+                  ]
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-access"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [
+                    "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                  ],
+                  "series": [
+                    {
+                      "type": "count",
+                      "id": "count()",
+                      "field": null
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [
+                    {
+                      "type": "values",
+                      "field": "Status_Code",
+                      "limit": 15
+                    }
+                  ],
+                  "type": "pivot",
+                  "id": "9e3f90c6-eca4-41d1-9c82-f55c408bb728",
+                  "column_groups": [],
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "count()",
+                      "direction": "Descending"
+                    }
+                  ]
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-access AND *_HIT"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [
+                    "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                  ],
+                  "series": [
+                    {
+                      "type": "sum",
+                      "id": "sum(Squid_GBytes)",
+                      "field": "Squid_GBytes"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [],
+                  "type": "pivot",
+                  "id": "d6ad47f8-7e38-4fc9-9f76-75b6fc645591",
+                  "column_groups": [],
+                  "sort": []
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-access AND ((URI_Host:*microsoft.com) OR (URI_Host:*windowsupdate.com))"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [
+                    "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                  ],
+                  "series": [
+                    {
+                      "type": "sum",
+                      "id": "sum(Squid_GBytes)",
+                      "field": "Squid_GBytes"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [],
+                  "type": "pivot",
+                  "id": "1362eb72-807e-4e02-8dd6-4cddcdd163bc",
+                  "column_groups": [],
+                  "sort": []
+                }
+              ]
+            },
+            {
+              "id": "a0f9e551-8aff-408e-bec9-8abec6b0f6a8",
+              "timerange": {
+                "type": "relative",
+                "range": 300
+              },
+              "query": {
+                "type": "elasticsearch",
+                "query_string": ""
+              },
+              "search_types": [
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-access AND Result_Code:TCP_DENIED"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [],
+                  "series": [
+                    {
+                      "type": "count",
+                      "id": "count()",
+                      "field": null
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [
+                    {
+                      "type": "values",
+                      "field": "Client_Address",
+                      "limit": 15
+                    }
+                  ],
+                  "type": "pivot",
+                  "id": "efb14d9f-b948-4a4a-94f3-e2498508ac12",
+                  "column_groups": [],
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "count()",
+                      "direction": "Descending"
+                    }
+                  ]
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-access AND Result_Code:TCP_DENIED"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [
+                    "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                  ],
+                  "series": [
+                    {
+                      "type": "sum",
+                      "id": "sum(Squid_GBytes)",
+                      "field": "Squid_GBytes"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [],
+                  "type": "pivot",
+                  "id": "c2332131-da53-445d-b0f9-f374ca4f29e1",
+                  "column_groups": [],
+                  "sort": []
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-access AND Result_Code:TCP_DENIED"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [],
+                  "series": [
+                    {
+                      "type": "count",
+                      "id": "count()",
+                      "field": null
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [],
+                  "type": "pivot",
+                  "id": "5fcb84f9-93ad-4156-bd05-22fd9109a771",
+                  "column_groups": [],
+                  "sort": []
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-access AND Result_Code:TCP_DENIED"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [],
+                  "series": [
+                    {
+                      "type": "count",
+                      "id": "count()",
+                      "field": null
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [
+                    {
+                      "type": "values",
+                      "field": "URI_Host",
+                      "limit": 15
+                    }
+                  ],
+                  "type": "pivot",
+                  "id": "c1c3399e-a3eb-4666-ae77-112e69d403d1",
+                  "column_groups": [],
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "count()",
+                      "direction": "Descending"
+                    }
+                  ]
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-access AND Result_Code:TCP_DENIED"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [],
+                  "series": [
+                    {
+                      "type": "count",
+                      "id": "count()",
+                      "field": null
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [
+                    {
+                      "type": "values",
+                      "field": "User",
+                      "limit": 15
+                    }
+                  ],
+                  "type": "pivot",
+                  "id": "c1aa57ef-f533-4edd-8d31-f4001e2f98e2",
+                  "column_groups": [],
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "count()",
+                      "direction": "Descending"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "1deb23d0-c8bb-4d22-9e9a-36902b64391b",
+              "timerange": {
+                "type": "relative",
+                "range": 300
+              },
+              "query": {
+                "type": "elasticsearch",
+                "query_string": ""
+              },
+              "search_types": [
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "SQUID_hostLevel2:download.windowsupdate.com"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [
+                    "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                  ],
+                  "series": [
+                    {
+                      "type": "sum",
+                      "id": "sum(Squid_GBytes)",
+                      "field": "Squid_GBytes"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [],
+                  "type": "pivot",
+                  "id": "ebb323a2-a182-4ef9-9bcf-daa2d87bd6f3",
+                  "column_groups": [],
+                  "sort": []
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "URI_Host:*tlu.dl.delivery.mp.microsoft.com"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [
+                    "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                  ],
+                  "series": [
+                    {
+                      "type": "sum",
+                      "id": "sum(Squid_GBytes)",
+                      "field": "Squid_GBytes"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [],
+                  "type": "pivot",
+                  "id": "e74f92c9-ba9a-473e-8c7e-ae8bef0ea97b",
+                  "column_groups": [],
+                  "sort": []
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": " URI_Host:*.tlu.dl.delivery.mp.microsoft.com OR URI_Host:*.download.windowsupdate.com*"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [
+                    "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                  ],
+                  "series": [
+                    {
+                      "type": "sum",
+                      "id": "sum(Squid_GBytes)",
+                      "field": "Squid_GBytes"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [
+                    {
+                      "type": "time",
+                      "field": "timestamp",
+                      "interval": {
+                        "type": "auto",
+                        "scaling": 1
+                      }
+                    }
+                  ],
+                  "type": "pivot",
+                  "id": "a6c883cb-f2a5-4b44-a0f8-79fe57cf80a3",
+                  "column_groups": [
+                    {
+                      "type": "values",
+                      "field": "URI_Host",
+                      "limit": 15
+                    }
+                  ],
+                  "sort": [
+                    {
+                      "type": "pivot",
+                      "field": "timestamp",
+                      "direction": "Ascending"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "c8c07561-8c82-4a75-98f7-991ab3d98f17",
+              "timerange": {
+                "type": "relative",
+                "range": 300
+              },
+              "query": {
+                "type": "elasticsearch",
+                "query_string": ""
+              },
+              "search_types": [
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-access AND NOT Result_Code:TCP_DENIED"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [
+                    "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                  ],
+                  "series": [
+                    {
+                      "type": "sum",
+                      "id": "sum(Squid_GBytes)",
+                      "field": "Squid_GBytes"
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [],
+                  "type": "pivot",
+                  "id": "db8ae8e6-f34b-4806-8afd-a25b5dcfe3fb",
+                  "column_groups": [],
+                  "sort": []
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-access AND NOT Result_Code:TCP_DENIED"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [],
+                  "series": [
+                    {
+                      "type": "count",
+                      "id": "count()",
+                      "field": null
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [
+                    {
+                      "type": "values",
+                      "field": "URI_Host",
+                      "limit": 15
+                    }
+                  ],
+                  "type": "pivot",
+                  "id": "20a1c88f-c4c7-48eb-95f2-34aa41baa5a9",
+                  "column_groups": [],
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "count()",
+                      "direction": "Descending"
+                    }
+                  ]
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-access AND NOT Result_Code:TCP_DENIED"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [],
+                  "series": [
+                    {
+                      "type": "count",
+                      "id": "count()",
+                      "field": null
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [
+                    {
+                      "type": "values",
+                      "field": "User",
+                      "limit": 15
+                    }
+                  ],
+                  "type": "pivot",
+                  "id": "9cf9135a-6539-4afa-8214-bd1b4de52ead",
+                  "column_groups": [],
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "count()",
+                      "direction": "Descending"
+                    }
+                  ]
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-access AND NOT Result_Code:TCP_DENIED"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [],
+                  "series": [
+                    {
+                      "type": "count",
+                      "id": "count()",
+                      "field": null
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [
+                    {
+                      "type": "values",
+                      "field": "Client_Address",
+                      "limit": 15
+                    }
+                  ],
+                  "type": "pivot",
+                  "id": "023e95bf-70b3-44b5-8497-39a1a523977d",
+                  "column_groups": [],
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "count()",
+                      "direction": "Descending"
+                    }
+                  ]
+                },
+                {
+                  "query": {
+                    "type": "elasticsearch",
+                    "query_string": "application_name:squid\\-access AND NOT Result_Code:TCP_DENIED"
+                  },
+                  "name": "chart",
+                  "timerange": {
+                    "type": "relative",
+                    "range": 86400
+                  },
+                  "streams": [],
+                  "series": [
+                    {
+                      "type": "count",
+                      "id": "count()",
+                      "field": null
+                    }
+                  ],
+                  "filter": null,
+                  "rollup": true,
+                  "row_groups": [],
+                  "type": "pivot",
+                  "id": "a0fe7b5c-9298-4f9e-8b2b-bea5b14dd5c7",
+                  "column_groups": [],
+                  "sort": []
+                }
+              ]
+            }
+          ],
+          "parameters": [],
+          "requires": {},
+          "owner": "admin",
+          "created_at": "2020-08-12T22:33:59.072Z"
+        },
+        "created_at": "2016-10-29T12:45:38.336Z",
+        "requires": {},
+        "state": {
+          "00000171-ba98-ffdb-a960-00155d2e4305": {
+            "selected_fields": null,
+            "static_message_list_id": null,
+            "titles": {
+              "widget": {
+                "923293e9-557c-4154-bae8-b1282e948a2b": "Microsoft GB",
+                "00000171-ba98-ffc0-a960-00155d2e4305": "Microsoft Delivery Optimization",
+                "00000171-ba98-ffc1-a960-00155d2e4305": "Cache HITS GB Day",
+                "00000171-ba98-ffc2-a960-00155d2e4305": "Requests by Users",
+                "00000171-ba98-ffc3-a960-00155d2e4305": "Total GB Day",
+                "00000171-ba98-ffc4-a960-00155d2e4305": "Status_Codes Hits",
+                "00000171-ba98-ffc5-a960-00155d2e4305": "Squid Hits",
+                "00000171-ba98-ffc6-a960-00155d2e4305": "Client_Address Hits",
+                "fdda239c-6ed1-4588-861d-0a270335afa0": "Result_Code Hits (copy)",
+                "00000171-ba98-ffc7-a960-00155d2e4305": "Unique Client_Address",
+                "00000171-ba98-ffc8-a960-00155d2e4305": "Cache Domains Hits",
+                "00000171-ba98-ffc9-a960-00155d2e4305": "Top Domains Hits",
+                "00000171-ba98-ffca-a960-00155d2e4305": "Result_Code Hits",
+                "b831b3c1-9824-473c-8bd2-9dcb9029ee14": "Youtube GB",
+                "f3f3f1d2-49f4-4fbf-a157-c165265a8540": "Squid Hits (copy)",
+                "1ce09048-7310-454b-aed5-7e52cde244d1": "Apple GB",
+                "09a28dc1-f096-4bce-a2e8-82ffd2731cc3": "Cache Domains Bytes"
+              },
+              "tab": {
+                "title": "Squid Stats"
+              }
+            },
+            "widgets": [
+              {
+                "id": "00000171-ba98-ffc1-a960-00155d2e4305",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-access AND *_HIT"
+                },
+                "streams": [
+                  "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                ],
+                "config": {
+                  "visualization": "numeric",
+                  "event_annotation": false,
+                  "row_pivots": [],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "sum(Squid_GBytes)"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": {
+                    "trend": false,
+                    "trend_preference": "NEUTRAL"
+                  },
+                  "formatting_settings": null,
+                  "sort": []
+                }
+              },
+              {
+                "id": "b831b3c1-9824-473c-8bd2-9dcb9029ee14",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-access AND ((URI_Host:*youtube.com) OR (URI_Host:*googlevideo.com))"
+                },
+                "streams": [
+                  "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                ],
+                "config": {
+                  "visualization": "numeric",
+                  "event_annotation": false,
+                  "row_pivots": [],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "sum(Squid_GBytes)"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": {
+                    "trend": false,
+                    "trend_preference": "NEUTRAL"
+                  },
+                  "formatting_settings": null,
+                  "sort": []
+                }
+              },
+              {
+                "id": "a3eb0847-a6de-408b-96dc-5b9987c30ae7",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-access"
+                },
+                "streams": [
+                  "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                ],
+                "config": {
+                  "visualization": "line",
+                  "event_annotation": false,
+                  "row_pivots": [
+                    {
+                      "field": "timestamp",
+                      "type": "time",
+                      "config": {
+                        "interval": {
+                          "type": "auto",
+                          "scaling": null
+                        }
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "sum(Squid_GBytes)"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": {
+                    "interpolation": "spline"
+                  },
+                  "formatting_settings": null,
+                  "sort": [
+                    {
+                      "type": "pivot",
+                      "field": "timestamp",
+                      "direction": "Ascending"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "923293e9-557c-4154-bae8-b1282e948a2b",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-access AND ((URI_Host:*microsoft.com) OR (URI_Host:*windowsupdate.com))"
+                },
+                "streams": [
+                  "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                ],
+                "config": {
+                  "visualization": "numeric",
+                  "event_annotation": false,
+                  "row_pivots": [],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "sum(Squid_GBytes)"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": {
+                    "trend": false,
+                    "trend_preference": "NEUTRAL"
+                  },
+                  "formatting_settings": null,
+                  "sort": []
+                }
+              },
+              {
+                "id": "00000171-ba98-ffc6-a960-00155d2e4305",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-access"
+                },
+                "streams": [
+                  "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                ],
+                "config": {
+                  "visualization": "table",
+                  "event_annotation": false,
+                  "row_pivots": [
+                    {
+                      "field": "Client_Address",
+                      "type": "values",
+                      "config": {
+                        "limit": 15
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "count()"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": null,
+                  "formatting_settings": null,
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "count()",
+                      "direction": "Descending"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "1ce09048-7310-454b-aed5-7e52cde244d1",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-access AND ((URI_Host:*apple.com) OR (URI_Host:*icloud*))"
+                },
+                "streams": [
+                  "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                ],
+                "config": {
+                  "visualization": "numeric",
+                  "event_annotation": false,
+                  "row_pivots": [],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "sum(Squid_GBytes)"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": {
+                    "trend": false,
+                    "trend_preference": "NEUTRAL"
+                  },
+                  "formatting_settings": null,
+                  "sort": []
+                }
+              },
+              {
+                "id": "00000171-ba98-ffc4-a960-00155d2e4305",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-access"
+                },
+                "streams": [
+                  "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                ],
+                "config": {
+                  "visualization": "table",
+                  "event_annotation": false,
+                  "row_pivots": [
+                    {
+                      "field": "Status_Code",
+                      "type": "values",
+                      "config": {
+                        "limit": 15
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "count()"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": null,
+                  "formatting_settings": null,
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "count()",
+                      "direction": "Descending"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "00000171-ba98-ffc5-a960-00155d2e4305",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-access"
+                },
+                "streams": [
+                  "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                ],
+                "config": {
+                  "visualization": "numeric",
+                  "event_annotation": false,
+                  "row_pivots": [],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "count()"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": {
+                    "trend": false,
+                    "trend_preference": "HIGHER"
+                  },
+                  "formatting_settings": null,
+                  "sort": []
+                }
+              },
+              {
+                "id": "00000171-ba98-ffc9-a960-00155d2e4305",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-access"
+                },
+                "streams": [
+                  "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                ],
+                "config": {
+                  "visualization": "table",
+                  "event_annotation": false,
+                  "row_pivots": [
+                    {
+                      "field": "URI_Host",
+                      "type": "values",
+                      "config": {
+                        "limit": 15
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "count()"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": null,
+                  "formatting_settings": null,
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "count()",
+                      "direction": "Descending"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "00000171-ba98-ffca-a960-00155d2e4305",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-access"
+                },
+                "streams": [
+                  "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                ],
+                "config": {
+                  "visualization": "table",
+                  "event_annotation": false,
+                  "row_pivots": [
+                    {
+                      "field": "Result_Code",
+                      "type": "values",
+                      "config": {
+                        "limit": 15
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "count()"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": null,
+                  "formatting_settings": null,
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "count()",
+                      "direction": "Descending"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "00000171-ba98-ffc7-a960-00155d2e4305",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-access"
+                },
+                "streams": [],
+                "config": {
+                  "visualization": "numeric",
+                  "event_annotation": false,
+                  "row_pivots": [],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "card(Client_Address)"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": {
+                    "trend": false,
+                    "trend_preference": "HIGHER"
+                  },
+                  "formatting_settings": null,
+                  "sort": []
+                }
+              },
+              {
+                "id": "00000171-ba98-ffc3-a960-00155d2e4305",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-access"
+                },
+                "streams": [
+                  "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                ],
+                "config": {
+                  "visualization": "numeric",
+                  "event_annotation": false,
+                  "row_pivots": [],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "sum(Squid_GBytes)"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": {
+                    "trend": false,
+                    "trend_preference": "NEUTRAL"
+                  },
+                  "formatting_settings": null,
+                  "sort": []
+                }
+              },
+              {
+                "id": "00000171-ba98-ffc2-a960-00155d2e4305",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-access"
+                },
+                "streams": [
+                  "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                ],
+                "config": {
+                  "visualization": "table",
+                  "event_annotation": false,
+                  "row_pivots": [
+                    {
+                      "field": "User",
+                      "type": "values",
+                      "config": {
+                        "limit": 15
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "count()"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": null,
+                  "formatting_settings": null,
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "count()",
+                      "direction": "Descending"
+                    }
+                  ]
+                }
+              }
+            ],
+            "widget_mapping": {
+              "923293e9-557c-4154-bae8-b1282e948a2b": [
+                "1362eb72-807e-4e02-8dd6-4cddcdd163bc"
+              ],
+              "00000171-ba98-ffc1-a960-00155d2e4305": [
+                "d6ad47f8-7e38-4fc9-9f76-75b6fc645591"
+              ],
+              "00000171-ba98-ffc2-a960-00155d2e4305": [
+                "9eaab732-38e1-4841-af71-709a12e8228d"
+              ],
+              "00000171-ba98-ffc3-a960-00155d2e4305": [
+                "ec5548df-1609-48e0-8a12-3566d1454930"
+              ],
+              "00000171-ba98-ffc4-a960-00155d2e4305": [
+                "9e3f90c6-eca4-41d1-9c82-f55c408bb728"
+              ],
+              "00000171-ba98-ffc5-a960-00155d2e4305": [
+                "492b2088-3a40-4a82-805c-cea0f19782ef"
+              ],
+              "00000171-ba98-ffc6-a960-00155d2e4305": [
+                "0d90b2ce-cfbb-4ae4-96bb-13cc9a22d526"
+              ],
+              "00000171-ba98-ffc7-a960-00155d2e4305": [
+                "4ac38272-df59-45ec-8ace-7097dbbe3cf2"
+              ],
+              "00000171-ba98-ffc9-a960-00155d2e4305": [
+                "3e18846b-bdf0-4e10-9cea-c98afe6ae56a"
+              ],
+              "a3eb0847-a6de-408b-96dc-5b9987c30ae7": [
+                "09fa4199-72c2-4c05-817b-8ab3e55feea4"
+              ],
+              "00000171-ba98-ffca-a960-00155d2e4305": [
+                "9ef42fdb-2ce4-496f-a080-b56c5925334e"
+              ],
+              "b831b3c1-9824-473c-8bd2-9dcb9029ee14": [
+                "97723125-7469-48f9-a740-72a27a176e73"
+              ],
+              "1ce09048-7310-454b-aed5-7e52cde244d1": [
+                "e05e0802-592d-4e73-a300-454dee6e18f5"
+              ]
+            },
+            "positions": {
+              "923293e9-557c-4154-bae8-b1282e948a2b": {
+                "col": 3,
+                "row": 5,
+                "height": 2,
+                "width": 3
+              },
+              "00000171-ba98-ffc1-a960-00155d2e4305": {
+                "col": 1,
+                "row": 3,
+                "height": 2,
+                "width": 2
+              },
+              "00000171-ba98-ffc2-a960-00155d2e4305": {
+                "col": 1,
+                "row": 9,
+                "height": 2,
+                "width": 2
+              },
+              "00000171-ba98-ffc3-a960-00155d2e4305": {
+                "col": 1,
+                "row": 1,
+                "height": 2,
+                "width": 2
+              },
+              "00000171-ba98-ffc4-a960-00155d2e4305": {
+                "col": 6,
+                "row": 7,
+                "height": 4,
+                "width": 3
+              },
+              "00000171-ba98-ffc5-a960-00155d2e4305": {
+                "col": 1,
+                "row": 5,
+                "height": 2,
+                "width": 2
+              },
+              "00000171-ba98-ffc6-a960-00155d2e4305": {
+                "col": 9,
+                "row": 7,
+                "height": 4,
+                "width": 3
+              },
+              "00000171-ba98-ffc7-a960-00155d2e4305": {
+                "col": 1,
+                "row": 7,
+                "height": 2,
+                "width": 2
+              },
+              "00000171-ba98-ffc9-a960-00155d2e4305": {
+                "col": 9,
+                "row": 1,
+                "height": 4,
+                "width": 3
+              },
+              "a3eb0847-a6de-408b-96dc-5b9987c30ae7": {
+                "col": 3,
+                "row": 1,
+                "height": 4,
+                "width": 6
+              },
+              "00000171-ba98-ffca-a960-00155d2e4305": {
+                "col": 3,
+                "row": 7,
+                "height": 4,
+                "width": 3
+              },
+              "b831b3c1-9824-473c-8bd2-9dcb9029ee14": {
+                "col": 9,
+                "row": 5,
+                "height": 2,
+                "width": 3
+              },
+              "1ce09048-7310-454b-aed5-7e52cde244d1": {
+                "col": 6,
+                "row": 5,
+                "height": 2,
+                "width": 3
+              }
+            },
+            "formatting": {
+              "highlighting": []
+            },
+            "display_mode_settings": {
+              "positions": {}
+            }
+          },
+          "1deb23d0-c8bb-4d22-9e9a-36902b64391b": {
+            "selected_fields": null,
+            "static_message_list_id": null,
+            "titles": {
+              "tab": {
+                "title": "Windows Updates"
+              },
+              "widget": {
+                "7b1ad251-8f0b-4a46-96ef-60e805e4d8be": "Microsoft Delivery Optimization Bytes",
+                "9e1f0fdc-e9c0-4e80-9f51-04ad80349bfc": "Windows Update",
+                "b3ba278f-5886-4440-932d-1cc8103d472b": "Windows Update & Delivery Optimization"
+              }
+            },
+            "widgets": [
+              {
+                "id": "9e1f0fdc-e9c0-4e80-9f51-04ad80349bfc",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "SQUID_hostLevel2:download.windowsupdate.com"
+                },
+                "streams": [
+                  "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                ],
+                "config": {
+                  "visualization": "numeric",
+                  "event_annotation": false,
+                  "row_pivots": [],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "sum(Squid_GBytes)"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": {
+                    "trend": false,
+                    "trend_preference": "NEUTRAL"
+                  },
+                  "formatting_settings": null,
+                  "sort": []
+                }
+              },
+              {
+                "id": "7b1ad251-8f0b-4a46-96ef-60e805e4d8be",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "URI_Host:*tlu.dl.delivery.mp.microsoft.com"
+                },
+                "streams": [
+                  "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                ],
+                "config": {
+                  "visualization": "numeric",
+                  "event_annotation": false,
+                  "row_pivots": [],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "sum(Squid_GBytes)"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": {
+                    "trend": false,
+                    "trend_preference": "NEUTRAL"
+                  },
+                  "formatting_settings": null,
+                  "sort": []
+                }
+              },
+              {
+                "id": "b3ba278f-5886-4440-932d-1cc8103d472b",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": " URI_Host:*.tlu.dl.delivery.mp.microsoft.com OR URI_Host:*.download.windowsupdate.com*"
+                },
+                "streams": [
+                  "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                ],
+                "config": {
+                  "visualization": "line",
+                  "event_annotation": false,
+                  "row_pivots": [
+                    {
+                      "field": "timestamp",
+                      "type": "time",
+                      "config": {
+                        "interval": {
+                          "type": "auto",
+                          "scaling": null
+                        }
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "sum(Squid_GBytes)"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [
+                    {
+                      "field": "URI_Host",
+                      "type": "values",
+                      "config": {
+                        "limit": 15
+                      }
+                    }
+                  ],
+                  "visualization_config": {
+                    "interpolation": "spline"
+                  },
+                  "formatting_settings": null,
+                  "sort": [
+                    {
+                      "type": "pivot",
+                      "field": "timestamp",
+                      "direction": "Ascending"
+                    }
+                  ]
+                }
+              }
+            ],
+            "widget_mapping": {
+              "b3ba278f-5886-4440-932d-1cc8103d472b": [
+                "a6c883cb-f2a5-4b44-a0f8-79fe57cf80a3"
+              ],
+              "7b1ad251-8f0b-4a46-96ef-60e805e4d8be": [
+                "e74f92c9-ba9a-473e-8c7e-ae8bef0ea97b"
+              ],
+              "9e1f0fdc-e9c0-4e80-9f51-04ad80349bfc": [
+                "ebb323a2-a182-4ef9-9bcf-daa2d87bd6f3"
+              ]
+            },
+            "positions": {
+              "9e1f0fdc-e9c0-4e80-9f51-04ad80349bfc": {
+                "col": 1,
+                "row": 1,
+                "height": 2,
+                "width": 3
+              },
+              "b3ba278f-5886-4440-932d-1cc8103d472b": {
+                "col": 4,
+                "row": 1,
+                "height": 6,
+                "width": 9
+              },
+              "7b1ad251-8f0b-4a46-96ef-60e805e4d8be": {
+                "col": 1,
+                "row": 3,
+                "height": 2,
+                "width": 3
+              }
+            },
+            "formatting": {
+              "highlighting": []
+            },
+            "display_mode_settings": {
+              "positions": {}
+            }
+          },
+          "c8c07561-8c82-4a75-98f7-991ab3d98f17": {
+            "selected_fields": null,
+            "static_message_list_id": null,
+            "titles": {
+              "tab": {
+                "title": "Squid TCP_ALLOWED"
+              },
+              "widget": {
+                "c20ca4b0-a074-4979-84d2-60d276ba03ca": "TCP_ALLOWED Hits",
+                "6c726852-9c17-4564-b014-bd58dbddfb96": "TCP_ALLOWED GB",
+                "30e525de-f9fd-474b-94a2-8dbf5e2a03ec": "TCP_ALLOWED Domain Hits",
+                "9b8d2c4f-3c8c-436a-aa6e-38e79287ffc9": "TCP_ALLOWED Clients Hits",
+                "549225c1-9765-432f-8d16-0de9ae85e6da": "TCP_ALLOWED User Hits"
+              }
+            },
+            "widgets": [
+              {
+                "id": "549225c1-9765-432f-8d16-0de9ae85e6da",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-access AND NOT Result_Code:TCP_DENIED"
+                },
+                "streams": [],
+                "config": {
+                  "visualization": "table",
+                  "event_annotation": false,
+                  "row_pivots": [
+                    {
+                      "field": "User",
+                      "type": "values",
+                      "config": {
+                        "limit": 15
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "count()"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": null,
+                  "formatting_settings": null,
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "count()",
+                      "direction": "Descending"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "9b8d2c4f-3c8c-436a-aa6e-38e79287ffc9",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-access AND NOT Result_Code:TCP_DENIED"
+                },
+                "streams": [],
+                "config": {
+                  "visualization": "table",
+                  "event_annotation": false,
+                  "row_pivots": [
+                    {
+                      "field": "Client_Address",
+                      "type": "values",
+                      "config": {
+                        "limit": 15
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "count()"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": null,
+                  "formatting_settings": null,
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "count()",
+                      "direction": "Descending"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "6c726852-9c17-4564-b014-bd58dbddfb96",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-access AND NOT Result_Code:TCP_DENIED"
+                },
+                "streams": [
+                  "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                ],
+                "config": {
+                  "visualization": "numeric",
+                  "event_annotation": false,
+                  "row_pivots": [],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "sum(Squid_GBytes)"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": {
+                    "trend": false,
+                    "trend_preference": "NEUTRAL"
+                  },
+                  "formatting_settings": null,
+                  "sort": []
+                }
+              },
+              {
+                "id": "30e525de-f9fd-474b-94a2-8dbf5e2a03ec",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-access AND NOT Result_Code:TCP_DENIED"
+                },
+                "streams": [],
+                "config": {
+                  "visualization": "table",
+                  "event_annotation": false,
+                  "row_pivots": [
+                    {
+                      "field": "URI_Host",
+                      "type": "values",
+                      "config": {
+                        "limit": 15
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "count()"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": null,
+                  "formatting_settings": null,
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "count()",
+                      "direction": "Descending"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "c20ca4b0-a074-4979-84d2-60d276ba03ca",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-access AND NOT Result_Code:TCP_DENIED"
+                },
+                "streams": [],
+                "config": {
+                  "visualization": "numeric",
+                  "event_annotation": false,
+                  "row_pivots": [],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "count()"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": {
+                    "trend": false,
+                    "trend_preference": "NEUTRAL"
+                  },
+                  "formatting_settings": null,
+                  "sort": []
+                }
+              }
+            ],
+            "widget_mapping": {
+              "549225c1-9765-432f-8d16-0de9ae85e6da": [
+                "9cf9135a-6539-4afa-8214-bd1b4de52ead"
+              ],
+              "9b8d2c4f-3c8c-436a-aa6e-38e79287ffc9": [
+                "023e95bf-70b3-44b5-8497-39a1a523977d"
+              ],
+              "c20ca4b0-a074-4979-84d2-60d276ba03ca": [
+                "a0fe7b5c-9298-4f9e-8b2b-bea5b14dd5c7"
+              ],
+              "30e525de-f9fd-474b-94a2-8dbf5e2a03ec": [
+                "20a1c88f-c4c7-48eb-95f2-34aa41baa5a9"
+              ],
+              "6c726852-9c17-4564-b014-bd58dbddfb96": [
+                "db8ae8e6-f34b-4806-8afd-a25b5dcfe3fb"
+              ]
+            },
+            "positions": {
+              "6c726852-9c17-4564-b014-bd58dbddfb96": {
+                "col": 1,
+                "row": 3,
+                "height": 2,
+                "width": 3
+              },
+              "c20ca4b0-a074-4979-84d2-60d276ba03ca": {
+                "col": 1,
+                "row": 1,
+                "height": 2,
+                "width": 3
+              },
+              "30e525de-f9fd-474b-94a2-8dbf5e2a03ec": {
+                "col": 4,
+                "row": 1,
+                "height": 4,
+                "width": 3
+              },
+              "9b8d2c4f-3c8c-436a-aa6e-38e79287ffc9": {
+                "col": 7,
+                "row": 1,
+                "height": 4,
+                "width": 3
+              },
+              "549225c1-9765-432f-8d16-0de9ae85e6da": {
+                "col": 10,
+                "row": 1,
+                "height": 4,
+                "width": 3
+              }
+            },
+            "formatting": {
+              "highlighting": []
+            },
+            "display_mode_settings": {
+              "positions": {}
+            }
+          },
+          "1e6a5ec6-1e7b-44b1-b4e6-6a05404fb0ee": {
+            "selected_fields": null,
+            "static_message_list_id": null,
+            "titles": {
+              "widget": {
+                "ca341b94-f93b-4258-a9a9-a183774a825c": "Google Meet Web Trafic MB"
+              }
+            },
+            "widgets": [
+              {
+                "id": "ca341b94-f93b-4258-a9a9-a183774a825c",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 28800
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "URI_Port:[19302 TO 19309]"
+                },
+                "streams": [
+                  "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                ],
+                "config": {
+                  "visualization": "line",
+                  "event_annotation": false,
+                  "row_pivots": [
+                    {
+                      "field": "timestamp",
+                      "type": "time",
+                      "config": {
+                        "interval": {
+                          "type": "auto",
+                          "scaling": null
+                        }
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "sum(Squid_MBytes)"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [
+                    {
+                      "field": "URI_Host",
+                      "type": "values",
+                      "config": {
+                        "limit": 15
+                      }
+                    }
+                  ],
+                  "visualization_config": null,
+                  "formatting_settings": null,
+                  "sort": [
+                    {
+                      "type": "pivot",
+                      "field": "timestamp",
+                      "direction": "Ascending"
+                    }
+                  ]
+                }
+              }
+            ],
+            "widget_mapping": {
+              "ca341b94-f93b-4258-a9a9-a183774a825c": [
+                "bd7fb3dd-939f-426f-ad97-d674ca455330"
+              ]
+            },
+            "positions": {
+              "ca341b94-f93b-4258-a9a9-a183774a825c": {
+                "col": 1,
+                "row": 1,
+                "height": 4,
+                "width": 4
+              }
+            },
+            "formatting": {
+              "highlighting": []
+            },
+            "display_mode_settings": {
+              "positions": {}
+            }
+          },
+          "a0f9e551-8aff-408e-bec9-8abec6b0f6a8": {
+            "selected_fields": null,
+            "static_message_list_id": null,
+            "titles": {
+              "tab": {
+                "title": "Squid TCP_DENIED"
+              },
+              "widget": {
+                "e1abf098-d803-4222-952f-b180848c5578": "TCP_DENIED Hits",
+                "e167f241-d52a-466f-bc87-bae86674862c": "TCP_DENIED GB",
+                "c3de3dd1-4e89-47fc-be6f-c92f24afaff7": "TCP_DENIED Domain Hits",
+                "cb0f0781-6cb5-46b6-b784-9b18945df0f8": "TCP_DENIED Clients Hits",
+                "adce7b51-2018-4d6c-b283-1f61d281be40": "TCP_DENIED User Hits"
+              }
+            },
+            "widgets": [
+              {
+                "id": "e167f241-d52a-466f-bc87-bae86674862c",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-access AND Result_Code:TCP_DENIED"
+                },
+                "streams": [
+                  "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                ],
+                "config": {
+                  "visualization": "numeric",
+                  "event_annotation": false,
+                  "row_pivots": [],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "sum(Squid_GBytes)"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": {
+                    "trend": false,
+                    "trend_preference": "NEUTRAL"
+                  },
+                  "formatting_settings": null,
+                  "sort": []
+                }
+              },
+              {
+                "id": "adce7b51-2018-4d6c-b283-1f61d281be40",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-access AND Result_Code:TCP_DENIED"
+                },
+                "streams": [],
+                "config": {
+                  "visualization": "table",
+                  "event_annotation": false,
+                  "row_pivots": [
+                    {
+                      "field": "User",
+                      "type": "values",
+                      "config": {
+                        "limit": 15
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "count()"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": null,
+                  "formatting_settings": null,
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "count()",
+                      "direction": "Descending"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "e1abf098-d803-4222-952f-b180848c5578",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-access AND Result_Code:TCP_DENIED"
+                },
+                "streams": [],
+                "config": {
+                  "visualization": "numeric",
+                  "event_annotation": false,
+                  "row_pivots": [],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "count()"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": {
+                    "trend": false,
+                    "trend_preference": "NEUTRAL"
+                  },
+                  "formatting_settings": null,
+                  "sort": []
+                }
+              },
+              {
+                "id": "cb0f0781-6cb5-46b6-b784-9b18945df0f8",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-access AND Result_Code:TCP_DENIED"
+                },
+                "streams": [],
+                "config": {
+                  "visualization": "table",
+                  "event_annotation": false,
+                  "row_pivots": [
+                    {
+                      "field": "Client_Address",
+                      "type": "values",
+                      "config": {
+                        "limit": 15
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "count()"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": null,
+                  "formatting_settings": null,
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "count()",
+                      "direction": "Descending"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "c3de3dd1-4e89-47fc-be6f-c92f24afaff7",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-access AND Result_Code:TCP_DENIED"
+                },
+                "streams": [],
+                "config": {
+                  "visualization": "table",
+                  "event_annotation": false,
+                  "row_pivots": [
+                    {
+                      "field": "URI_Host",
+                      "type": "values",
+                      "config": {
+                        "limit": 15
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "count()"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": null,
+                  "formatting_settings": null,
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "count()",
+                      "direction": "Descending"
+                    }
+                  ]
+                }
+              }
+            ],
+            "widget_mapping": {
+              "e1abf098-d803-4222-952f-b180848c5578": [
+                "5fcb84f9-93ad-4156-bd05-22fd9109a771"
+              ],
+              "adce7b51-2018-4d6c-b283-1f61d281be40": [
+                "c1aa57ef-f533-4edd-8d31-f4001e2f98e2"
+              ],
+              "c3de3dd1-4e89-47fc-be6f-c92f24afaff7": [
+                "c1c3399e-a3eb-4666-ae77-112e69d403d1"
+              ],
+              "cb0f0781-6cb5-46b6-b784-9b18945df0f8": [
+                "efb14d9f-b948-4a4a-94f3-e2498508ac12"
+              ],
+              "e167f241-d52a-466f-bc87-bae86674862c": [
+                "c2332131-da53-445d-b0f9-f374ca4f29e1"
+              ]
+            },
+            "positions": {
+              "e167f241-d52a-466f-bc87-bae86674862c": {
+                "col": 1,
+                "row": 3,
+                "height": 2,
+                "width": 3
+              },
+              "e1abf098-d803-4222-952f-b180848c5578": {
+                "col": 1,
+                "row": 1,
+                "height": 2,
+                "width": 3
+              },
+              "c3de3dd1-4e89-47fc-be6f-c92f24afaff7": {
+                "col": 4,
+                "row": 1,
+                "height": 4,
+                "width": 3
+              },
+              "cb0f0781-6cb5-46b6-b784-9b18945df0f8": {
+                "col": 7,
+                "row": 1,
+                "height": 4,
+                "width": 3
+              },
+              "adce7b51-2018-4d6c-b283-1f61d281be40": {
+                "col": 10,
+                "row": 1,
+                "height": 4,
+                "width": 3
+              }
+            },
+            "formatting": {
+              "highlighting": []
+            },
+            "display_mode_settings": {
+              "positions": {}
+            }
+          },
+          "dc01c655-a84b-4939-b981-98b1e05a773a": {
+            "selected_fields": null,
+            "static_message_list_id": null,
+            "titles": {
+              "widget": {
+                "29563826-50b5-45f4-bf8b-66e5f8c0fe7f": "NBN AVG Connection Duration",
+                "508580c4-f18f-4b4a-bdae-be4ac7d74e34": "TOP DET LINK HOGS",
+                "193a1806-586f-4fa5-84fe-79c9daa505aa": "DET LINK TOTAL",
+                "fda99b65-5adb-4c5b-942e-950a6a874e44": "TOP NBN LINK TOTAL",
+                "8435883a-4c4e-40a0-8d0f-ce3aaa47e9b4": "DET AVG Connection Duration",
+                "c57cc441-b6fc-497c-b68d-3f26f16093e1": "TOP DET LINK HOGS (copy)",
+                "0861d868-e18d-4024-b931-3c731b0edca9": "Client_Address HOGS",
+                "555ef991-5287-4111-9e19-cc75ad31e488": "Client_Address HOGS",
+                "5d780d1d-97c8-400e-afec-131d61be4e24": "Client_Address HOGS (copy)",
+                "0f0f69b9-3db8-4e4d-b468-245f281f2557": "TOP NBN LINK HOGS"
+              },
+              "tab": {
+                "title": "Squid Link HOGS"
+              }
+            },
+            "widgets": [
+              {
+                "id": "508580c4-f18f-4b4a-bdae-be4ac7d74e34",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-access AND Peer_Host:changemetoip"
+                },
+                "streams": [
+                  "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                ],
+                "config": {
+                  "visualization": "table",
+                  "event_annotation": false,
+                  "row_pivots": [
+                    {
+                      "field": "URI_Host",
+                      "type": "values",
+                      "config": {
+                        "limit": 15
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "sum(Squid_GBytes)"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": null,
+                  "formatting_settings": null,
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "sum(Squid_GBytes)",
+                      "direction": "Descending"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "fda99b65-5adb-4c5b-942e-950a6a874e44",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-access AND Peer_Host:10.174.64.122"
+                },
+                "streams": [
+                  "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                ],
+                "config": {
+                  "visualization": "numeric",
+                  "event_annotation": false,
+                  "row_pivots": [],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "sum(Squid_GBytes)"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": null,
+                  "formatting_settings": null,
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "sum(Squid_GBytes)",
+                      "direction": "Descending"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "0861d868-e18d-4024-b931-3c731b0edca9",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-access"
+                },
+                "streams": [
+                  "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                ],
+                "config": {
+                  "visualization": "heatmap",
+                  "event_annotation": false,
+                  "row_pivots": [
+                    {
+                      "field": "Client_Address",
+                      "type": "values",
+                      "config": {
+                        "limit": 10
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "sum(Squid_GBytes)"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [
+                    {
+                      "field": "URI_Host",
+                      "type": "values",
+                      "config": {
+                        "limit": 5
+                      }
+                    }
+                  ],
+                  "visualization_config": null,
+                  "formatting_settings": null,
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "sum(Squid_GBytes)",
+                      "direction": "Descending"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "8435883a-4c4e-40a0-8d0f-ce3aaa47e9b4",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-access AND Peer_Host:changemetoip"
+                },
+                "streams": [
+                  "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                ],
+                "config": {
+                  "visualization": "numeric",
+                  "event_annotation": false,
+                  "row_pivots": [],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "avg(Duration)"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": null,
+                  "formatting_settings": null,
+                  "sort": []
+                }
+              },
+              {
+                "id": "555ef991-5287-4111-9e19-cc75ad31e488",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-access"
+                },
+                "streams": [
+                  "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                ],
+                "config": {
+                  "visualization": "table",
+                  "event_annotation": false,
+                  "row_pivots": [
+                    {
+                      "field": "Client_Address",
+                      "type": "values",
+                      "config": {
+                        "limit": 50
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "sum(Squid_GBytes)"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": null,
+                  "formatting_settings": null,
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "sum(Squid_GBytes)",
+                      "direction": "Descending"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "29563826-50b5-45f4-bf8b-66e5f8c0fe7f",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-accessAND Peer_Host:10.174.64.122"
+                },
+                "streams": [
+                  "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                ],
+                "config": {
+                  "visualization": "numeric",
+                  "event_annotation": false,
+                  "row_pivots": [],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "avg(Duration)"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": null,
+                  "formatting_settings": null,
+                  "sort": []
+                }
+              },
+              {
+                "id": "0f0f69b9-3db8-4e4d-b468-245f281f2557",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-accessAND Peer_Host:10.174.64.122"
+                },
+                "streams": [
+                  "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                ],
+                "config": {
+                  "visualization": "table",
+                  "event_annotation": false,
+                  "row_pivots": [
+                    {
+                      "field": "URI_Host",
+                      "type": "values",
+                      "config": {
+                        "limit": 15
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "sum(Squid_GBytes)"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": null,
+                  "formatting_settings": null,
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "sum(Squid_GBytes)",
+                      "direction": "Descending"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "193a1806-586f-4fa5-84fe-79c9daa505aa",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-access AND Peer_Host:changemetoip"
+                },
+                "streams": [
+                  "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                ],
+                "config": {
+                  "visualization": "numeric",
+                  "event_annotation": false,
+                  "row_pivots": [],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "sum(Squid_GBytes)"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": null,
+                  "formatting_settings": null,
+                  "sort": []
+                }
+              }
+            ],
+            "widget_mapping": {
+              "0f0f69b9-3db8-4e4d-b468-245f281f2557": [
+                "af0984a3-a4e0-48bd-acdc-2a71f21efe0a"
+              ],
+              "8435883a-4c4e-40a0-8d0f-ce3aaa47e9b4": [
+                "36ce49c3-da14-4b57-abcd-0c9f0a0c316e"
+              ],
+              "0861d868-e18d-4024-b931-3c731b0edca9": [
+                "146a3756-4d91-4be5-82d3-5779af0451c2"
+              ],
+              "29563826-50b5-45f4-bf8b-66e5f8c0fe7f": [
+                "16d529a0-8726-4126-bd09-5baa72ce4ed5"
+              ],
+              "555ef991-5287-4111-9e19-cc75ad31e488": [
+                "ae27cf5b-11dc-49d8-aa8b-642bd6588352"
+              ],
+              "193a1806-586f-4fa5-84fe-79c9daa505aa": [
+                "facdb2ee-40df-4383-ab6b-b256579d96fc"
+              ],
+              "508580c4-f18f-4b4a-bdae-be4ac7d74e34": [
+                "1e15c040-47ff-40ee-abad-97296b8d290c"
+              ],
+              "fda99b65-5adb-4c5b-942e-950a6a874e44": [
+                "7aa0aa8c-360f-4a7b-91a6-9df49dca4933"
+              ]
+            },
+            "positions": {
+              "555ef991-5287-4111-9e19-cc75ad31e488": {
+                "col": 1,
+                "row": 1,
+                "height": 4,
+                "width": 4
+              },
+              "0861d868-e18d-4024-b931-3c731b0edca9": {
+                "col": 1,
+                "row": 5,
+                "height": 4,
+                "width": 4
+              },
+              "508580c4-f18f-4b4a-bdae-be4ac7d74e34": {
+                "col": 5,
+                "row": 3,
+                "height": 4,
+                "width": 4
+              },
+              "fda99b65-5adb-4c5b-942e-950a6a874e44": {
+                "col": 9,
+                "row": 1,
+                "height": 2,
+                "width": 4
+              },
+              "0f0f69b9-3db8-4e4d-b468-245f281f2557": {
+                "col": 9,
+                "row": 3,
+                "height": 4,
+                "width": 4
+              },
+              "193a1806-586f-4fa5-84fe-79c9daa505aa": {
+                "col": 5,
+                "row": 1,
+                "height": 2,
+                "width": 4
+              },
+              "8435883a-4c4e-40a0-8d0f-ce3aaa47e9b4": {
+                "col": 5,
+                "row": 7,
+                "height": 2,
+                "width": 4
+              },
+              "29563826-50b5-45f4-bf8b-66e5f8c0fe7f": {
+                "col": 9,
+                "row": 7,
+                "height": 2,
+                "width": 4
+              }
+            },
+            "formatting": {
+              "highlighting": []
+            },
+            "display_mode_settings": {
+              "positions": {}
+            }
+          },
+          "0b0a2c9f-d588-42b9-9a0d-ddbb1e5111b2": {
+            "selected_fields": null,
+            "static_message_list_id": null,
+            "titles": {
+              "tab": {
+                "title": "Top Staff/Student/Desktops"
+              },
+              "widget": {
+                "b6ec1fc9-2554-42d4-8150-28d807ce0d8a": "Top Student Users",
+                "16054c8f-baca-40cc-9b63-ca8e0cf02cfd": "Top Staff Users",
+                "6c8274ce-2f0a-4667-bc76-3ae8869174f0": "Top Desktop Users"
+              }
+            },
+            "widgets": [
+              {
+                "id": "6c8274ce-2f0a-4667-bc76-3ae8869174f0",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-access AND Client_Address:172.22.*"
+                },
+                "streams": [
+                  "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                ],
+                "config": {
+                  "visualization": "table",
+                  "event_annotation": false,
+                  "row_pivots": [
+                    {
+                      "field": "Client_Address",
+                      "type": "values",
+                      "config": {
+                        "limit": 30
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "sum(Squid_GBytes)"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": null,
+                  "formatting_settings": null,
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "sum(Squid_GBytes)",
+                      "direction": "Descending"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "b6ec1fc9-2554-42d4-8150-28d807ce0d8a",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-access AND Client_Address:172.24.*"
+                },
+                "streams": [
+                  "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                ],
+                "config": {
+                  "visualization": "table",
+                  "event_annotation": false,
+                  "row_pivots": [
+                    {
+                      "field": "Client_Address",
+                      "type": "values",
+                      "config": {
+                        "limit": 30
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "sum(Squid_GBytes)"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": null,
+                  "formatting_settings": null,
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "sum(Squid_GBytes)",
+                      "direction": "Descending"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "16054c8f-baca-40cc-9b63-ca8e0cf02cfd",
+                "type": "aggregation",
+                "filter": null,
+                "timerange": {
+                  "type": "relative",
+                  "range": 86400
+                },
+                "query": {
+                  "type": "elasticsearch",
+                  "query_string": "application_name:squid\\-access AND Client_Address:172.20.*"
+                },
+                "streams": [
+                  "0ae576d9-66cf-4374-9646-d6cdf9616eea"
+                ],
+                "config": {
+                  "visualization": "table",
+                  "event_annotation": false,
+                  "row_pivots": [
+                    {
+                      "field": "Client_Address",
+                      "type": "values",
+                      "config": {
+                        "limit": 30
+                      }
+                    }
+                  ],
+                  "series": [
+                    {
+                      "config": {
+                        "name": null
+                      },
+                      "function": "sum(Squid_GBytes)"
+                    }
+                  ],
+                  "rollup": true,
+                  "column_pivots": [],
+                  "visualization_config": null,
+                  "formatting_settings": null,
+                  "sort": [
+                    {
+                      "type": "series",
+                      "field": "sum(Squid_GBytes)",
+                      "direction": "Descending"
+                    }
+                  ]
+                }
+              }
+            ],
+            "widget_mapping": {
+              "16054c8f-baca-40cc-9b63-ca8e0cf02cfd": [
+                "002d19ce-2add-4e30-8b54-0d3497ffe54d"
+              ],
+              "b6ec1fc9-2554-42d4-8150-28d807ce0d8a": [
+                "284403f0-cb75-4a34-afae-ce918e04d9f6"
+              ],
+              "6c8274ce-2f0a-4667-bc76-3ae8869174f0": [
+                "cdfb3d84-87b5-4d47-a455-c13eaa3e1d17"
+              ]
+            },
+            "positions": {
+              "b6ec1fc9-2554-42d4-8150-28d807ce0d8a": {
+                "col": 1,
+                "row": 1,
+                "height": 4,
+                "width": 4
+              },
+              "16054c8f-baca-40cc-9b63-ca8e0cf02cfd": {
+                "col": 5,
+                "row": 1,
+                "height": 4,
+                "width": 4
+              },
+              "6c8274ce-2f0a-4667-bc76-3ae8869174f0": {
+                "col": 9,
+                "row": 1,
+                "height": 4,
+                "width": 4
+              }
+            },
+            "formatting": {
+              "highlighting": []
+            },
+            "display_mode_settings": {
+              "positions": {}
+            }
+          }
+        },
+        "properties": [],
+        "owner": "admin",
+        "title": {
+          "@type": "string",
+          "@value": "SquidStats"
+        },
+        "type": "DASHBOARD",
+        "description": {
+          "@type": "string",
+          "@value": "Statistics for Squid"
+        }
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=3.3.6+92fb41e"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "b6a7c7bc-5487-42fc-865b-d1dba98e4b9b",
+      "data": {
+        "name": "SQUIDURIFRAG",
+        "pattern": "([a-z0-9-._~!$&'()*+,;=:]+)"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=3.3.6+92fb41e"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "892cbce0-5a79-4d26-9141-01816cfb0d54",
+      "data": {
+        "name": "SQUIDCONTENTTYPE",
+        "pattern": "([-\\w]{1,127}\\/[-\\w]{1,127})|(-)"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=3.3.6+92fb41e"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "9a126fdb-9be1-422a-80b9-ae0a2c63a612",
+      "data": {
+        "name": "SQUIDURIPORT",
+        "pattern": "([\\d]+)"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=3.3.6+92fb41e"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "566f7fa5-3cf4-48b2-8117-62564d876480",
+      "data": {
+        "name": "SQUIDURIPROTO",
+        "pattern": "([a-z]+)"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=3.3.6+92fb41e"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "35847725-91a0-40b7-b5cb-8d6e98194d84",
+      "data": {
+        "name": "SQUIDURIHOST",
+        "pattern": "([a-z0-9-._~!$&'()*+,;=]+)"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=3.3.6+92fb41e"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "4ca73ac9-8eaf-4153-8a16-1542edceb443",
+      "data": {
+        "name": "SPACE",
+        "pattern": "\\s*"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=3.3.6+92fb41e"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "f4f72b3c-c6cd-4794-8165-50a0779ac9a6",
+      "data": {
+        "name": "WORD",
+        "pattern": "\\b\\w+\\b"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=3.3.6+92fb41e"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "eecf3177-38dd-4509-a630-7e6ab9690e4f",
+      "data": {
+        "name": "DATA",
+        "pattern": ".*?"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=3.3.6+92fb41e"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "b8cfb601-e3e8-48be-8cc6-9387b01a7efa",
+      "data": {
+        "name": "IPV4",
+        "pattern": "(?<![0-9])(?:(?:[0-1]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])[.](?:[0-1]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])[.](?:[0-1]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])[.](?:[0-1]?[0-9]{1,2}|2[0-4][0-9]|25[0-5]))(?![0-9])"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=3.3.6+92fb41e"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "c7c3d286-9d96-47d7-8b2d-fc0777a0c156",
+      "data": {
+        "name": "BASE10NUM",
+        "pattern": "(?<![0-9.+-])(?>[+-]?(?:(?:[0-9]+(?:\\.[0-9]+)?)|(?:\\.[0-9]+)))"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=3.3.6+92fb41e"
+        }
+      ]
+    },
+    {
+      "v": "1",
+      "type": {
+        "name": "grok_pattern",
+        "version": "1"
+      },
+      "id": "80727d38-7109-426e-b7ba-e9988a7a1373",
+      "data": {
+        "name": "INT",
+        "pattern": "(?:[+-]?(?:[0-9]+))"
+      },
+      "constraints": [
+        {
+          "type": "server-version",
+          "version": ">=3.3.6+92fb41e"
+        }
+      ]
+    }
+  ]
 }
